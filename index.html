@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Simulatore Bolletta</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+  <script>
+  	window.PDFLib = window['pdf-lib'];
+  </script>
+
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #fffbe6;
+      margin: 0;
+      padding: 0;
+    }
+
+    .login-screen {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: linear-gradient(to right, #fffbe6, #fffbe6);
+    }
+
+    .login-box {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(46, 46, 46, 0.2);
+      width: 300px;
+    }
+
+    .login-box h2 {
+      text-align: center;
+      color: #ffd200;
+    }
+
+    .login-box input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+
+    .login-box button {
+      background-color: #ffd200;
+      color: #2e2e2e;
+      border: none;
+      padding: 10px;
+      width: 100%;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .main-content {
+      display: none;
+      padding: 30px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+
+    .windmill {
+      width: 48px;
+      height: 48px;
+      animation: rotate 2s linear infinite;
+      transform-origin: center;
+    }
+
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    h1 {
+      font-size: 28px;
+      color: #ffd200;
+      margin: 0;
+    }
+
+    .flex-container {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .container {
+      flex: 1 1 45%;
+      background: white;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      min-width: 300px;
+    }
+
+    .section {
+      margin-bottom: 15px;
+    }
+
+    .section label {
+      display: block;
+      margin-top: 10px;
+      font-weight: 500;
+    }
+
+    input[type="number"],
+    input[type="text"] {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    .radio-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+
+    .radio-group label {
+      white-space: nowrap;
+    }
+
+    button {
+      background-color: #ffd200;
+      color: #2e2e2e;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+
+    .output {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .windmill line,
+    .windmill circle {
+      stroke: #ffd200 !important;
+      fill: #ffd200 !important;
+    }
+  </style>
+</head>
+<body>
+
+ <div class="login-screen">
+    <div class="login-box">
+      <h2>Accesso</h2>
+      <input type="text" id="username" placeholder="Username" />
+      <input type="password" id="password" placeholder="Password" />
+      <button onclick="checkLogin()">Accedi</button>
+    </div>
+  </div>
+
+  <div class="main-content">
+    <div class="header">
+      <svg class="windmill" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="8" />
+        <line x1="50" y1="50" x2="50" y2="20" stroke-width="4" />
+        <line x1="50" y1="50" x2="80" y2="65" stroke-width="4" />
+        <line x1="50" y1="50" x2="20" y2="65" stroke-width="4" />
+      </svg>
+      <h1>Fastweb Energia</h1>
+    </div>
+
+
+    <div class="section">
+      
+    </div>
+
+  
+
+    <div class="flex-container">
+      <div class="container" id="formCalcolo">
+        <div class="section radio-group">
+          <label><input type="radio" name="frequenza" value="mensile" /> Mensile</label>
+          <label><input type="radio" name="frequenza" value="bimestrale" checked /> Bimestrale</label>
+          <label id="canoneContainer"><input type="checkbox" id="residente" /> Residente </label>
+          <label id="clienteContainer"><input type="checkbox" id="cliente" /> Cliente Fastweb/Vodafone </label>
+        </div>
+
+        <div class="section">
+                  <label>Fornitore</label>
+                  <select id="quotaFissaSelect">
+                    <option value="12">Enel</option>
+                    <option value="10">Edison</option>
+                    <option value="12">Eni Plenitude</option>
+                    <option value="8">Octopus</option>
+                    <option value="11.5">Iren</option>
+                    <option value="9.5">a2a</option>
+                    <option value="5">Poste</option>
+                    <option value="9">Wind3</option>
+                    <option value="5">Acea</option>
+                    <option value="12">Sorgenia</option>
+                    <option value="6">Engie</option>
+                    <option value="5.7">NEN</option>
+                    <option value="12">Pulse</option>
+                    <option value="20">Octopus</option>
+                    <option value="10">Wekiwi</option>
+                    <option value="10">Illumia</option>
+                    
+                  </select>
+                </div>
+
+        <div class="section">
+          <label>Spesa materia prima (€)</label>
+          <input type="number" id="spesaMateria" />
+        </div>
+
+        
+
+        <div class="section">
+          <label>Consumo fatturato (<span class="unit">kWh</span>)</label>
+          <input type="number" id="consumo" />
+        </div>
+
+        <div class="section">
+          <button id="calcolaTariffa">Calcola Tariffa</button>
+          <div class="output" id="outputTariffa">Prezzo unitario calcolato: x €/ <span class="unit">kWh</span></div>
+        </div>
+      </div>
+
+      <div class="container" id="formSimulazione">
+        <div class="section radio-group tariff-section" id="tariffOptions">
+          <label>Seleziona Tariffa Fastweb:</label>
+        </div>
+
+        <div class="section">
+          <button id="simulaBtn">Simula Bolletta</button>
+          <div class="output" id="outputBolletta">Totale Bolletta: x €</div>
+          <button id="downloadPdf" class="hidden">Scarica PDF</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const loginScreen = document.querySelector('.login-screen');
+    const mainContent = document.querySelector('.main-content');
+
+    function checkLogin() {
+      const user = document.getElementById('username').value;
+      const pass = document.getElementById('password').value;
+      if (user === '' && pass === '') {
+        loginScreen.style.display = 'none';
+        mainContent.style.display = 'block';
+      } else {
+        alert('Credenziali non valide');
+      }
+    }
+
+    const toggleBtn = document.getElementById("toggleEnergy");
+    const unitLabels = document.querySelectorAll(".unit");
+    const simulaBtn = document.getElementById("simulaBtn");
+    const downloadBtn = document.getElementById("downloadPdf");
+    const consumoInput = document.getElementById("consumo");
+    const spesaMateriaInput = document.getElementById("spesaMateria");
+    const quotaFissaSelect = document.getElementById("quotaFissaSelect");
+    const calcolaBtn = document.getElementById("calcolaTariffa");
+    const outputTariffa = document.getElementById("outputTariffa");
+    const outputBolletta = document.getElementById("outputBolletta");
+    const residenteCheckbox = document.getElementById("residente");
+    const canoneContainer = document.getElementById("canoneContainer");
+    const clienteCheckbox = document.getElementById("cliente");
+    const clienteContainer = document.getElementById("clienteContainer");
+    const tariffOptions = document.getElementById("tariffOptions");
+
+    let luceAttiva = true;
+
+    const prezziLuce = {
+      flex: 0.142,
+      fix: 0.193
+    };
+
+    const prezziGas = {
+      full: 0.56,
+      start: 0.62,
+      smart: 0.54
+    };
+
+    function aggiornaTariffe() {
+      tariffOptions.innerHTML = `<label>Seleziona Tariffa Fastweb:</label>`;
+      const tariffe = luceAttiva ? prezziLuce : prezziGas;
+      Object.keys(tariffe).forEach(t => {
+        tariffOptions.innerHTML += `<label><input type="radio" name="tariffa" value="${t}" /> ${t.toUpperCase()}</label>`;
+      });
+    }
+
+    
+
+    function getFrequenza() {
+      const freq = document.querySelector('input[name="frequenza"]:checked');
+      return freq ? freq.value : "bimestrale";
+    }
+
+    function getTariffaPrezzo(nome) {
+      const prezzi = luceAttiva ? prezziLuce : prezziGas;
+      return prezzi[nome] || 0;
+    }
+
+    calcolaBtn.addEventListener("click", () => {
+      const spesa = parseFloat(spesaMateriaInput.value) || 0;
+      let quotaFissa = parseFloat(quotaFissaSelect.value) || 0;
+      const consumo = parseFloat(consumoInput.value) || 0;
+      const frequenza = getFrequenza();
+      if (frequenza === "bimestrale") quotaFissa *= 2;
+      const tariffa = consumo > 0 ? (spesa - quotaFissa) / consumo : 0;
+      outputTariffa.textContent = `Prezzo unitario calcolato: ${tariffa.toFixed(3)} €/ ${luceAttiva ? 'kWh' : 'mcs'}`;
+    });
+
+    simulaBtn.addEventListener("click", () => {
+      const consumo = parseFloat(consumoInput.value) || 0;
+      const frequenza = getFrequenza();
+      const tariffaSelezionata = document.querySelector("input[name='tariffa']:checked");
+      const prezzoTariffa = tariffaSelezionata ? getTariffaPrezzo(tariffaSelezionata.value) : 0;
+      quotaFissaFastweb = frequenza === "mensile" ? 13 : 26;
+      const canoneNonResidente = frequenza === "mensile" ? 12 : 24;
+      const ivaTot = 1.1 * 1.2 * 1.22;
+      let totale = (consumo * prezzoTariffa + quotaFissaFastweb) * ivaTot + canoneNonResidente;
+      if (luceAttiva && residenteCheckbox.checked) {
+        totale += frequenza === "mensile" ? -3 : -6;
+      }
+      if (luceAttiva && clienteCheckbox.checked) {
+        totale += frequenza === "mensile" ? -12 : -22;
+      }
+      outputBolletta.textContent = `Totale Bolletta: ${totale.toFixed(2)} €`;
+      downloadBtn.classList.remove("hidden");
+    });
+
+    const { PDFDocument } = window;
+    downloadBtn.addEventListener("click", async () => {
+      const consumo = consumoInput.value || "0";
+      const spesa = spesaMateriaInput.value || "0";
+      const existingPdfBytes = await fetch("bolletta-a2a-facsimile.pdf").then(res => res.arrayBuffer());
+      const pdfDoc = await PDFDocument.load(existingPdfBytes);
+      const pages = pdfDoc.getPages();
+      pages[0].drawText(`CONSUMO: ${consumo} ${luceAttiva ? 'kWh' : 'mcs'}`, { x: 120, y: 500, size: 10 });
+      if (pages[1]) {
+        pages[1].drawText(`SPESA MATERIA: ${spesa} €`, { x: 120, y: 500, size: 10 });
+      }
+      const pdfBytes = await pdfDoc.save();
+      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = 'bolletta_compilata.pdf';
+      link.click();
+    });
+
+    aggiornaTariffe();
+  </script>
+</body>
+</html>
