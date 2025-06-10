@@ -328,24 +328,67 @@
       outputTariffa.textContent = `Prezzo unitario calcolato: ${tariffa.toFixed(3)} €/ ${luceAttiva ? 'kWh' : 'mcs'}`;
     });
 
-    simulaBtn.addEventListener("click", () => {
-      const consumo = parseFloat(consumoInput.value) || 0;
-      const frequenza = getFrequenza();
-      const tariffaSelezionata = document.querySelector("input[name='tariffa']:checked");
-      const prezzoTariffa = tariffaSelezionata ? getTariffaPrezzo(tariffaSelezionata.value) : 0;
-      quotaFissaFastweb = frequenza === "mensile" ? 13 : 26;
-      const canoneNonResidente = frequenza === "mensile" ? 12 : 24;
-      const ivaTot = 1.1 * 1.2 * 1.22;
-      let totale = (consumo * prezzoTariffa + quotaFissaFastweb) * ivaTot + canoneNonResidente;
-      if (luceAttiva && residenteCheckbox.checked) {
-        totale += frequenza === "mensile" ? -3 : -6;
-      }
-      if (luceAttiva && clienteCheckbox.checked) {
-        totale += frequenza === "mensile" ? -12 : -22;
-      }
-      outputBolletta.textContent = `Totale Bolletta: ${totale.toFixed(2)} €`;
-      downloadBtn.classList.remove("hidden");
-    });
+   simulaBtn.addEventListener("click", () => {
+  const consumo = parseFloat(consumoInput.value) || 0;
+  const frequenza = getFrequenza();
+  const tariffaSelezionata = document.querySelector("input[name='tariffa']:checked");
+  const prezzoTariffa = tariffaSelezionata ? getTariffaPrezzo(tariffaSelezionata.value) : 0;
+  const quotaFissaFastweb = frequenza === "mensile" ? 13 : 26;
+  const canoneNonResidente = frequenza === "mensile" ? 12 : 24;
+  const ivaTot = 1.1 * 1.2 * 1.22;
+
+  let totaleBase = (consumo * prezzoTariffa + quotaFissaFastweb);
+  let totale = totaleBase * ivaTot + canoneNonResidente;
+  let scontoResidente = 0;
+  let scontoCliente = 0;
+
+  if (luceAttiva && residenteCheckbox.checked) {
+    scontoResidente = frequenza === "mensile" ? 3 : 6;
+    totale -= scontoResidente;
+  }
+  if (luceAttiva && clienteCheckbox.checked) {
+    scontoCliente = frequenza === "mensile" ? 12 : 22;
+    totale -= scontoCliente;
+  }
+
+  // Funzione per formattare la linea con puntini di riempimento e allineare i valori a destra
+  function formatVoce(nome, valore) {
+    const maxLength = 30;
+    const nomeStr = nome;
+    const valoreStr = valore.toFixed(2) + " €";
+    const punti = ".".repeat(Math.max(2, maxLength - nomeStr.length - valoreStr.length));
+    return nomeStr + punti + valoreStr;
+  }
+
+  // Mostro il totale
+  outputBolletta.textContent = `Totale Bolletta: ${totale.toFixed(2)} €`;
+
+  // Creo e aggiungo il dettaglio sotto l'output
+  let dettaglio = 
+    formatVoce("Consumo per l'energia", consumo * prezzoTariffa + quotaFissaFastweb) + "\n" +
+    formatVoce("Spesa per il trasporto e per la gestione del contatore", totaleBase * (ivaTot - 1)) + "\n" +
+    formatVoce("Totale imposte e IVA", totaleBase * (0.1)) + "\n" +
+    formatVoce("Tassa non residente", canoneNonResidente) + "\n";
+
+  if (scontoResidente > 0) {
+    dettaglio += formatVoce("Sconto residente", -scontoResidente) + "\n";
+  }
+  if (scontoCliente > 0) {
+    dettaglio += formatVoce("Sconto cliente", -scontoCliente) + "\n";
+  }
+
+  // Creo un elemento <pre> per mantenere gli allineamenti e lo aggiungo dopo outputBolletta
+  let preDettaglio = document.getElementById("dettaglioBolletta");
+  if (!preDettaglio) {
+    preDettaglio = document.createElement("pre");
+    preDettaglio.id = "dettaglioBolletta";
+    preDettaglio.style.marginTop = "10px";
+    preDettaglio.style.fontWeight = "normal";
+    outputBolletta.parentNode.appendChild(preDettaglio);
+  }
+  preDettaglio.textContent = dettaglio;
+});
+
 
     const { PDFDocument } = window;
     downloadBtn.addEventListener("click", async () => {
@@ -370,3 +413,4 @@
   </script>
 </body>
 </html>
+
