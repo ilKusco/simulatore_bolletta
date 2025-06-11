@@ -143,6 +143,7 @@
       font-weight: bold;
       cursor: pointer;
       margin-top: 10px;
+      margin-bottom: 70px;
     }
 
     .output {
@@ -248,6 +249,7 @@
         <div class="section">
           <button id="simulaBtn">Simula Bolletta</button>
           <div class="output" id="outputBolletta">Totale Bolletta: x €</div>
+          <div class="output" id="outputRisparmio"></div>
           <button id="downloadPdf" class="hidden">Scarica PDF</button>
         </div>
       </div>
@@ -353,10 +355,10 @@
 
   // Funzione per formattare la linea con puntini di riempimento e allineare i valori a destra
   function formatVoce(nome, valore) {
-    const maxLength = 30;
+    const maxLength = 70;
     const nomeStr = nome;
     const valoreStr = valore.toFixed(2) + " €";
-    const punti = ".".repeat(Math.max(2, maxLength - nomeStr.length - valoreStr.length));
+    const punti = " ".repeat(Math.max(2, maxLength - nomeStr.length - valoreStr.length));
     return nomeStr + punti + valoreStr;
   }
 
@@ -366,15 +368,27 @@
   // Creo e aggiungo il dettaglio sotto l'output
   let dettaglio = 
     formatVoce("Consumo per l'energia", consumo * prezzoTariffa + quotaFissaFastweb) + "\n" +
-    formatVoce("Spesa per il trasporto e per la gestione del contatore", totaleBase * (ivaTot - 1)) + "\n" +
-    formatVoce("Totale imposte e IVA", totaleBase * (0.1)) + "\n" +
-    formatVoce("Tassa non residente", canoneNonResidente) + "\n";
+    formatVoce("Spesa per il trasporto e per la gestione del contatore", totaleBase * (0.2833)) + "\n" +
+    formatVoce("Oneri di sistema", totaleBase * (0.1333)) + "\n" +
+    formatVoce("Totale imposte e IVA", totaleBase * (0.2333)) + "\n";
 
-  if (scontoResidente > 0) {
-    dettaglio += formatVoce("Sconto residente", -scontoResidente) + "\n";
+  if (residenteCheckbox.checked & frequenza === "mensile") {
+    dettaglio += formatVoce("Canone RAI", 9) + "\n";
   }
-  if (scontoCliente > 0) {
-    dettaglio += formatVoce("Sconto cliente", -scontoCliente) + "\n";
+  if (!residenteCheckbox.checked & frequenza === "mensile") {
+    dettaglio += formatVoce("Tassa non residente", canoneNonResidente) + "\n";
+  }
+  if(residenteCheckbox.checked & frequenza === "bimestrale") {
+    dettaglio += formatVoce("Canone RAI", 18) + "\n";
+  }
+  if (!residenteCheckbox.checked & frequenza === "bimestrale") {
+    dettaglio += formatVoce("Tassa non residente", canoneNonResidente) + "\n";
+  }
+  if (clienteCheckbox.checked && scontoCliente < 15) {
+    dettaglio += formatVoce("Sconto cliente", -10) + "\n";
+  }
+  if (clienteCheckbox.checked && scontoCliente > 12) {
+    dettaglio += formatVoce("Sconto cliente", -20) + "\n";
   }
 
   // Creo un elemento <pre> per mantenere gli allineamenti e lo aggiungo dopo outputBolletta
@@ -387,6 +401,7 @@
     outputBolletta.parentNode.appendChild(preDettaglio);
   }
   preDettaglio.textContent = dettaglio;
+  
 });
 
 
