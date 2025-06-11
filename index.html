@@ -367,7 +367,7 @@
   let dettaglio = 
     formatVoce("Consumo per l'energia", consumo * prezzoTariffa + quotaFissaFastweb) + "\n" +
     formatVoce("Spesa per il trasporto e per la gestione del contatore", totaleBase * (ivaTot - 1)) + "\n" +
-    formatVoce("Totale imposte e IVA", totaleBase * 0.1 + "\n" +
+    formatVoce("Totale imposte e IVA", totaleBase * (0.1) + "\n" +
     formatVoce("Tassa non residente", canoneNonResidente) + "\n";
 
   if (scontoResidente > 0) {
