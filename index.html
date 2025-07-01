@@ -386,10 +386,10 @@
   if (!residenteCheckbox.checked & frequenza === "bimestrale") {
     dettaglio += formatVoce("Tassa non residente", canoneNonResidente) + "\n";
   }
-  if (clienteCheckbox.checked && scontoCliente < 15) {
+  if (clienteCheckbox.checked && scontoCliente < 5) {
     dettaglio += formatVoce("Sconto cliente", -3) + "\n";
   }
-  if (clienteCheckbox.checked && scontoCliente > 12) {
+  if (clienteCheckbox.checked && scontoCliente > 5) {
     dettaglio += formatVoce("Sconto cliente", -6) + "\n";
   }
 
