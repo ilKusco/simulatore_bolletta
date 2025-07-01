@@ -387,10 +387,10 @@
     dettaglio += formatVoce("Tassa non residente", canoneNonResidente) + "\n";
   }
   if (clienteCheckbox.checked && scontoCliente < 15) {
-    dettaglio += formatVoce("Sconto cliente", -10) + "\n";
+    dettaglio += formatVoce("Sconto cliente", -3) + "\n";
   }
   if (clienteCheckbox.checked && scontoCliente > 12) {
-    dettaglio += formatVoce("Sconto cliente", -20) + "\n";
+    dettaglio += formatVoce("Sconto cliente", -6) + "\n";
   }
 
   // Creo un elemento <pre> per mantenere gli allineamenti e lo aggiungo dopo outputBolletta
