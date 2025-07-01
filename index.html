@@ -290,8 +290,8 @@
     let luceAttiva = true;
 
     const prezziLuce = {
-      flex: 0.12,
-      fix: 0.193
+      flex: 0.145,
+      fix: 0.149
     };
 
     const prezziGas = {
@@ -347,11 +347,11 @@
   let scontoCliente = 0;
 
   if (luceAttiva && residenteCheckbox.checked) {
-    scontoResidente = frequenza === "mensile" ? 3 : 6;
+    scontoResidente = frequenza === "mensile" ? 10 : 20;
     totale -= scontoResidente;
   }
   if (luceAttiva && clienteCheckbox.checked) {
-    scontoCliente = frequenza === "mensile" ? 10 : 20;
+    scontoCliente = frequenza === "mensile" ? 3 : 6;
     totale -= scontoCliente;
   }
 
