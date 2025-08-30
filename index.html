@@ -263,7 +263,7 @@
     function checkLogin() {
       const user = document.getElementById('username').value;
       const pass = document.getElementById('password').value;
-      if (user === '' && pass === '') {
+      if (user === 'admin' && pass === 'admin') {
         loginScreen.style.display = 'none';
         mainContent.style.display = 'block';
       } else {
